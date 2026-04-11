@@ -79,7 +79,7 @@
 
         /* ─────────── ID CARD ─────────── */
         .id-card{
-            width:520px;height:260px;
+            width:460px;height:auto;
             position:relative;
             font-family:'Oswald',Arial,sans-serif;
             overflow:hidden;border-radius:12px;
@@ -101,8 +101,8 @@
         .ic-top-center{flex:1;text-align:center;}
         .ic-org{color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;line-height:1.3;}
         .ic-subtitle{color:#ffc107;font-size:8px;font-weight:600;letter-spacing:.3px;}
-        .ic-top-nmcp{width:36px;height:36px;background:#fff;border-radius:6px;padding:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-        .ic-top-nmcp img{width:100%;height:100%;object-fit:contain;}
+        .ic-top-nmcp{width:44px;height:44px;background:#fff;border-radius:6px;padding:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+        .ic-top-nmcp img{width:40px;height:40px;object-fit:contain;image-rendering:crisp-edges;image-rendering:-webkit-optimize-contrast;}
         .ic-top-nmcp .fb{font-size:7px;font-weight:700;color:#004080;text-align:center;line-height:1.2;}
 
         /* Card body: 3 columns */
@@ -117,7 +117,7 @@
         .ic-info{display:flex;flex-direction:column;justify-content:center;padding-top:2px;}
         .ic-name{font-size:13px;font-weight:700;color:#111;margin-bottom:1px;line-height:1.2;}
         .ic-id-num{font-size:11px;font-weight:700;color:#004080;margin-bottom:4px;}
-        .ic-role-badge{display:inline-block;background:#004080;color:#fff;font-size:8px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:5px;letter-spacing:.3px;}
+        .ic-role-badge{display:inline-block;color:#004080;font-size:9px;font-weight:700;margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase;}
         .ic-line{font-size:8px;color:#444;margin-bottom:2px;line-height:1.4;}
         .ic-line strong{color:#222;}
 
@@ -176,7 +176,7 @@
 
         /* ── MOBILE ── */
         @media(max-width:560px){
-            .id-card{width:360px;height:185px;}
+            .id-card{width:300px;height:auto;}
             .ic-body{grid-template-columns:68px 1fr 60px;gap:5px;padding:5px 8px 4px;}
             .ic-photo{width:68px;height:82px;}
             .ic-top-logo,.ic-top-nmcp{width:28px;height:28px;}
@@ -202,11 +202,11 @@
 <div class="page-header">
     <div class="hdr-logos">
         <div class="hdr-logo-box">
-            <img src="ICF-SL.jpg" alt="ICF-SL">
+            <img src="ICF-SL.png" alt="ICF-SL">
         </div>
         <div style="text-align:center;">
             <div class="hdr-title">Informatics Consultancy Firm – Sierra Leone (ICF-SL)</div>
-            <div class="hdr-tagline"><em>Data-Driven Solutions for Health and Development</em></div>
+            <div class="hdr-tagline"><em>Driving Data-Driven Solutions for Health and Development</em></div>
             <div class="hdr-main">SBD ID CARD GENERATOR</div>
             <div class="hdr-sub">School-Based Distribution of ITNs · National Malaria Control Programme</div>
         </div>
@@ -244,7 +244,7 @@
 
         <div class="fg">
             <label class="fl">Telephone</label>
-            <input type="text" class="fi" id="telephone" oninput="handleTelInput()" placeholder="+232 79 000 000">
+            <input type="tel" class="fi" id="telephone" oninput="handleTelInput()" placeholder="e.g. 079000000" maxlength="9" pattern="[0-9]{9}" inputmode="numeric">
         </div>
 
         <div class="fg">
@@ -350,7 +350,7 @@
 /* ─────────────────────────────────────────────────────────────
    GAS PROXY ENDPOINT  ← replace with your deployed Web App URL
    ───────────────────────────────────────────────────────────── */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwZoVy_5LQNFuaTb0N_69CF9fc40usq6zhdWCQQorhKPAc7yEov4oo2C_DIF4JlbLwQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID_HERE/exec";
 
 /* ─── HARDCODED LOGOS (place ICF-SL.png & NMCP.png in same folder as this HTML) ─── */
 const NMCP_LOGO = 'NMCP.png';
@@ -363,9 +363,13 @@ let qrInstance = null;
 
 /* ─── PHONE → ID ─── */
 function handleTelInput(){
-    const tel = document.getElementById('telephone').value.trim();
-    const clean = tel.replace(/[^0-9]/g,'');
-    document.getElementById('idNumber').value = clean ? 'SBD-' + clean : '';
+    const input = document.getElementById('telephone');
+    // Strip anything that isn't a digit
+    let clean = input.value.replace(/[^0-9]/g, '');
+    // Enforce 9-digit max
+    if(clean.length > 9) clean = clean.slice(0, 9);
+    input.value = clean;
+    document.getElementById('idNumber').value = clean.length === 9 ? 'SBD-' + clean : '';
     updatePreview();
 }
 
@@ -457,7 +461,7 @@ function updatePreview(){
 
     const d = {
         name:     getVal('fullName') || 'Full Name',
-        tel:      getVal('telephone') || '+232 XXX XXX',
+        tel:      getVal('telephone') || '079000000',
         idNum:    getVal('idNumber') || 'SBD-000',
         role:     getRadio('role') || 'Role',
         district: getRadio('district') || 'District',
