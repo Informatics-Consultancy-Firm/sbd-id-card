@@ -36,6 +36,7 @@
         /* ── FORM ── */
         .fg{margin-bottom:11px;}
         .fl{display:block;color:#004080;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+        .fl .req{color:#dc3545;margin-left:2px;}
         .fi,.fs{width:100%;padding:9px 11px;border:2px solid #004080;border-radius:6px;font-size:13px;font-family:'Oswald',Arial,sans-serif;font-weight:500;color:#111;background:#fff;}
         .fi:focus,.fs:focus{outline:none;border-color:#0056b3;box-shadow:0 0 0 3px rgba(0,64,128,.1);}
         .fi[readonly]{background:#f0f4f8;color:#555;}
@@ -221,7 +222,7 @@
     <div>
 
         <!-- PHOTO -->
-        <div class="sec-hdr"><span class="sec-num">1</span><span class="sec-lbl">PHOTO</span></div>
+        <div class="sec-hdr"><span class="sec-num">1</span><span class="sec-lbl">PHOTO <span style="color:#ffc107;">*</span></span></div>
         <div class="photo-wrap">
             <div class="photo-box" id="photoBox">
                 <div class="photo-ph"><span>👤</span><p>No photo</p></div>
@@ -238,12 +239,12 @@
         <div class="sec-hdr"><span class="sec-num">2</span><span class="sec-lbl">PERSONAL DETAILS</span></div>
 
         <div class="fg">
-            <label class="fl">Full Name</label>
+            <label class="fl">Full Name <span class="req">*</span></label>
             <input type="text" class="fi" id="fullName" oninput="updatePreview()" placeholder="Enter full name">
         </div>
 
         <div class="fg">
-            <label class="fl">Telephone</label>
+            <label class="fl">Telephone <span class="req">*</span></label>
             <input type="tel" class="fi" id="telephone" oninput="handleTelInput()" placeholder="e.g. 079000000" maxlength="9" pattern="[0-9]{9}" inputmode="numeric">
         </div>
 
@@ -253,7 +254,7 @@
         </div>
 
         <div class="fg">
-            <label class="fl">Role</label>
+            <label class="fl">Role <span class="req">*</span></label>
             <div class="radio-group" id="roleGroup">
                 <label class="radio-item"><input type="radio" name="role" value="National Monitor" onchange="updatePreview()"> <label>National Monitor</label></label>
                 <label class="radio-item"><input type="radio" name="role" value="SQOs" onchange="updatePreview()"> <label>SQOs</label></label>
@@ -265,7 +266,7 @@
         </div>
 
         <div class="fg">
-            <label class="fl">District</label>
+            <label class="fl">District <span class="req">*</span></label>
             <div class="radio-group" id="districtGroup">
                 <label class="radio-item"><input type="radio" name="district" value="Pujehun" onchange="updatePreview()"> <label>Pujehun</label></label>
                 <label class="radio-item"><input type="radio" name="district" value="Bonthe" onchange="updatePreview()"> <label>Bonthe</label></label>
@@ -287,11 +288,8 @@
 
         <!-- SUBMIT TO GAS -->
         <div class="submit-section">
-            <div class="submit-title">☁ Submit to Google Sheets</div>
-            <p style="font-size:10px;color:#444;margin-bottom:10px;line-height:1.5;">
-                Submits this record directly to the SBD Registry spreadsheet via the ICF-SL GAS proxy.
-            </p>
-            <button class="btn-green btn-full" onclick="submitToGAS()">📤 Submit Record to Sheet</button>
+            <div class="submit-title">☁ Submit Data to ICF-SL Server</div>
+            <button class="btn-green btn-full" onclick="submitToGAS()">📤 Submit Record</button>
             <div class="submit-status" id="submitStatus"></div>
         </div>
 
@@ -542,14 +540,25 @@ async function submitToGAS(){
         st.className = 'submit-status err';
         return;
     }
-    const role = getRadio('role');
+    const role     = getRadio('role');
     const district = getRadio('district');
-    if(!getVal('fullName')||!getVal('telephone')||!role||!district){
-        notify('Fill Name, Telephone, Role & District first','err'); return;
+    const tel      = getVal('telephone');
+    const errors   = [];
+    if(!uploadedPhoto)            errors.push('Photo');
+    if(!getVal('fullName').trim()) errors.push('Full Name');
+    if(tel.length !== 9)          errors.push('Telephone (9 digits required)');
+    if(!role)                     errors.push('Role');
+    if(!district)                 errors.push('District');
+    if(errors.length){
+        const st = document.getElementById('submitStatus');
+        st.textContent = '⚠️ Required: ' + errors.join(', ');
+        st.className = 'submit-status err';
+        notify('Fill all required fields','err');
+        return;
     }
     const payload = {
         name:       getVal('fullName'),
-        telephone:  getVal('telephone'),
+        telephone:  tel,
         idNumber:   getVal('idNumber'),
         role,
         district,
@@ -559,16 +568,16 @@ async function submitToGAS(){
     };
     notify('Submitting…','ok');
     const st = document.getElementById('submitStatus');
-    st.textContent = '⏳ Sending to Google Sheets…';
+    st.textContent = '⏳ Sending to ICF-SL Server…';
     st.className = 'submit-status ok';
     try{
         await fetch(GAS_URL, {
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify(payload),
-            mode:'no-cors'   // GAS requires no-cors; response is opaque but write succeeds
+            mode:'no-cors'
         });
-        st.textContent = '✅ Record submitted successfully! Check your Google Sheet.';
+        st.textContent = '✅ Record submitted successfully!';
         st.className = 'submit-status ok';
         notify('Submitted!','ok');
     } catch(e){
