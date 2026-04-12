@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -149,9 +149,7 @@
         <div class="photo-wrap">
             <div class="photo-box" id="photoBox"><div class="photo-ph"><span>👤</span><p>No photo</p></div></div>
             <div class="photo-btns">
-                <input type="file" id="photoUpload" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
-                <button class="btn-outline" onclick="document.getElementById('photoUpload').click()">📤 Upload</button>
-                <button class="btn-navy" onclick="openCamera()">📷 Camera</button>
+<button class="btn-navy" onclick="openCamera()">📷 Camera</button>
                 <button class="btn-danger" onclick="clearPhoto()">✕ Clear</button>
             </div>
         </div>
@@ -391,18 +389,12 @@ function handleTelInput() {
 }
 
 /* ── PHOTO ── */
-function handlePhotoUpload(e) {
-    var f = e.target.files[0]; if(!f) return;
-    var r = new FileReader();
-    r.onload = function(ev) { uploadedPhoto = ev.target.result; renderPhotoBox(); updatePreview(); notify('Photo uploaded!','ok'); };
-    r.readAsDataURL(f);
-}
 function renderPhotoBox() {
     var b = document.getElementById('photoBox');
     if (uploadedPhoto) { b.innerHTML = '<img src="'+uploadedPhoto+'" alt="Photo">'; b.classList.add('has-photo'); }
     else { b.innerHTML = '<div class="photo-ph"><span>👤</span><p>No photo</p></div>'; b.classList.remove('has-photo'); }
 }
-function clearPhoto() { uploadedPhoto=null; renderPhotoBox(); updatePreview(); document.getElementById('photoUpload').value=''; }
+function clearPhoto() { uploadedPhoto=null; renderPhotoBox(); updatePreview(); }
 
 /* ── CAMERA ── */
 function openCamera() {
