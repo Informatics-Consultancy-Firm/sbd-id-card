@@ -373,6 +373,11 @@ function getDistrict()  {
     if (CASCADE_ROLES.indexOf(role) !== -1) return getVal('cas-district');
     return getRadio('district');
 }
+function getChiefdom()  {
+    var role = getRadio('role');
+    if (CASCADE_ROLES.indexOf(role) !== -1) return getVal('cas-chiefdom');
+    return '';
+}
 function getFacility()  {
     var role = getRadio('role');
     if (CASCADE_ROLES.indexOf(role) !== -1) return getVal('cas-facility');
@@ -445,22 +450,21 @@ function renderQR(container, text) {
 function updatePreview() {
     var card = document.getElementById('cardPreview');
     var role     = getRadio('role')    || 'Role';
-    var district = getDistrict()       || 'District';
-    var facility = getFacility();
-
     var d = {
         name:       getVal('fullName')  || 'Full Name',
         tel:        getVal('telephone') || '079000000',
         idNum:      getVal('idNumber')  || 'SBD-000',
         role:       role,
-        district:   district,
-        facility:   facility,
+        district:   getDistrict() || 'District',
+        chiefdom:   getChiefdom(),
+        facility:   getFacility(),
         validUntil: getVal('validUntil') || 'May 31st, 2026',
         issuedBy:   getVal('issuedBy')   || 'NMCP / ICF-SL'
     };
 
     var photoHtml = uploadedPhoto ? '<img src="'+uploadedPhoto+'" alt="Photo">' : '<div class="ic-photo-ph">👤</div>';
-    var facilityLine = d.facility ? '<div class="ic-line"><strong>Facility:</strong> '+d.facility+'</div>' : '';
+    var chiefdomLine = d.chiefdom ? '<div class="ic-line"><strong>Chiefdom:</strong> '+d.chiefdom+'</div>' : '';
+    var facilityLine  = d.facility ? '<div class="ic-line"><strong>Facility:</strong> '+d.facility+'</div>' : '';
 
     card.innerHTML = '<div class="ic-top">' +
         '<div class="ic-top-nmcp"><img src="'+NMCP_LOGO+'" alt="NMCP" onerror="this.parentElement.innerHTML=\'<div style=font-size:7px;color:navy;text-align:center>NMCP</div>\'"></div>' +
@@ -473,6 +477,7 @@ function updatePreview() {
                 '<div class="ic-id-num">'+d.idNum+'</div>' +
                 '<div class="ic-role-badge">'+d.role+'</div>' +
                 '<div class="ic-line"><strong>District:</strong> '+d.district+'</div>' +
+                chiefdomLine +
                 facilityLine +
                 '<div class="ic-line"><strong>Tel:</strong> '+d.tel+'</div>' +
                 '<div class="ic-line"><strong>Valid Until:</strong> '+d.validUntil+'</div>' +
@@ -525,8 +530,9 @@ function submitToGAS() {
         notify('Fill all required fields','err');
         return;
     }
+    var chiefdom = getChiefdom();
     var payload = { action:'id_card', name:name, telephone:tel, idNumber:getVal('idNumber'), role:role, district:district,
-                    facility:facility, validUntil:getVal('validUntil'), issuedBy:getVal('issuedBy'), timestamp:new Date().toISOString() };
+                    chiefdom:chiefdom, facility:facility, validUntil:getVal('validUntil'), issuedBy:getVal('issuedBy'), timestamp:new Date().toISOString() };
     notify('Submitting…','ok');
     var st = document.getElementById('submitStatus');
     st.textContent = '⏳ Sending to ICF-SL Server…'; st.className = 'submit-status ok';
